@@ -1195,6 +1195,8 @@ class ProductsSection {
         this.barcodeInput = document.getElementById('barcode-input');
         this.lookupBarcodeBtn = document.getElementById('lookup-barcode-btn');
 
+        this.categoriesButtons = document.querySelectorAll('.product-category-btn');
+
 
         //when opening for first time
         this.productsEmpty.classList.remove('hidden');
@@ -1235,7 +1237,13 @@ class ProductsSection {
             }
         });
 
-
+        //using Categories
+        this.categoriesButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                let term = btn.getAttribute('data-category').replace('_', ' ');
+                this.SearchProduct(term);
+            });
+        })
         //nutri-score-filter All A B C D E
         this.nutriScoreFilterButtons.forEach(btn => {
             btn.addEventListener('click', () => {
@@ -1262,9 +1270,10 @@ class ProductsSection {
     hideSection() {
         this.productsSection.classList.add('hidden');
     }
-    async SearchProduct() {
+    async SearchProduct(term='') {
         try {
-            const value = (this.productSearchInput.value).toLowerCase();
+            let value = (this.productSearchInput.value || term).toLowerCase();
+
             let response = await fetch(`https://nutriplan-api.vercel.app/api/products/search?q=${value}&page=1&limit=24`);
             const result = await response.json();
             console.log(result);
