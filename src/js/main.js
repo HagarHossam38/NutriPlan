@@ -549,7 +549,7 @@ class MealDetails {
             this.logMealModal.classList.add('loading');
 
             const now = new Date();
-            this.loggedMeal.loggedAt = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+            this.loggedMeal.loggedAt = `${(h => h % 12 || 12)(now.getHours())}:${now.getMinutes().toString().padStart(2, '0')} ${now.getHours() >= 12 ? 'PM' : 'AM'}`;
             this.loggedMeal.servings = Number(this.mealServings.value);
             foodLogSection.logMeal(this.loggedMeal);
         });
@@ -1172,6 +1172,22 @@ class ProductsSection {
         this.productdetailModal = document.getElementById('product-detail-modal');
         this.productsCards;
         this.closeProductsModal;
+        this.logProductBtn;
+        this.loggedProduct = {
+            id_barcode: '',
+            category: '',
+            loggedAt: '',
+            name: '',
+            type: '',
+            thumbnail: '',
+            servings: '',
+            nutrition: {
+                calories: '',
+                carbs: '',
+                fat: '',
+                protein: ''
+            }
+        }
 
         this.productSearchInput = document.getElementById('product-search-input');
         this.searchProductBtn = document.getElementById('search-product-btn');
@@ -1193,7 +1209,7 @@ class ProductsSection {
             this.SearchProduct();
         });
         //using enter button
-        this.searchProductBtn.addEventListener('keydown', (e) => {
+        this.productSearchInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 this.productsEmpty.classList.add('hidden');
                 this.productsGrid.classList.add('hidden');
@@ -1210,7 +1226,7 @@ class ProductsSection {
             this.SearchBarcodeProduct();
         });
         //using enter button
-        this.lookupBarcodeBtn.addEventListener('keydown', (e) => {
+        this.barcodeInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 this.productsEmpty.classList.add('hidden');
                 this.productsGrid.classList.add('hidden');
@@ -1380,11 +1396,25 @@ class ProductsSection {
     }
 
     async fillProductModal(barcode) {
+
         try {
             let response = await fetch(`https://nutriplan-api.vercel.app/api/products/barcode/${barcode}`);
             const result = await response.json();
             const product = result.result;
             console.log(product);
+
+            this.loggedProduct.id_barcode = product.barcode;
+            this.loggedProduct.category = product.brand;
+            this.loggedProduct.name = product.name;
+            this.loggedProduct.type = 'Product';
+            this.loggedProduct.servings = 1;
+            this.loggedProduct.thumbnail = product.image;
+            this.loggedProduct.nutrition.calories = product.nutrients.calories;
+            this.loggedProduct.nutrition.carbs = product.nutrients.carbs;
+            this.loggedProduct.nutrition.fat = product.nutrients.fat;
+            this.loggedProduct.nutrition.protein = product.nutrients.protein;
+
+
             this.productdetailModal.innerHTML = `
   <div class="bg-white rounded-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
 
@@ -1453,7 +1483,7 @@ class ProductsSection {
               <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
                 <div class="bg-emerald-500 h-2 rounded-full" style="width: 12.6%"></div>
               </div>
-              <p class="text-lg font-bold text-emerald-600">${product.nutrients.calories}</p>
+              <p class="text-lg font-bold text-emerald-600">${product.nutrients.protein}</p>
               <p class="text-xs text-gray-500">Protein</p>
             </div>
             <div class="text-center">
@@ -1521,7 +1551,7 @@ class ProductsSection {
         <div class="flex gap-3">
           <button
             class="add-product-to-log flex-1 py-3 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition-all"
-            data-barcode="3017620425035">
+            data-barcode="${product.barcode}">
             <i class="mr-2 fa fa-plus"></i>Log This Food
           </button>
           <button
@@ -1543,7 +1573,18 @@ class ProductsSection {
             btn.addEventListener('click', () => {
                 this.productdetailModal.classList.add('loading');
             })
-        })
+        });
+
+        this.logProductBtn = document.querySelectorAll('.add-product-to-log');
+        this.logProductBtn.forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.productdetailModal.classList.add('loading');
+                const now = new Date();
+                this.loggedProduct.loggedAt = `${(h => h % 12 || 12)(now.getHours())}:${now.getMinutes().toString().padStart(2, '0')} ${now.getHours() >= 12 ? 'PM' : 'AM'}`;
+                foodLogSection.logMeal(this.loggedProduct);
+            })
+        });
+
 
     }
 
