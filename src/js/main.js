@@ -768,7 +768,7 @@ class MealDetails {
         this.loggedMeal.id_barcode = meal.id;
         this.loggedMeal.category = meal.category;
         this.loggedMeal.thumbnail = meal.thumbnail;
-        this.loggedMeal.type = 'meal';
+        this.loggedMeal.type = 'Recipe';
 
 
 
