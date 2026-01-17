@@ -1,3 +1,22 @@
 .loading {
-  display:none
+  display: none
+}
+
+/* Make text appear first and icon after it */
+.notyf__toast {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.notyf__message {
+  order: 1;
+  /* Text first */
+  margin-right: 8px;
+  /* Space before icon */
+}
+
+.notyf__icon {
+  order: 2;
+  /* Icon after text */
 }

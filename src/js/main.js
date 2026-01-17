@@ -5,6 +5,7 @@
  * Import your modules and initialize the app here.
  */
 
+
 //==========================Variables==========================
 const mealIcons = {
     Beef: 'fa-solid fa-drumstick-bite',
@@ -268,6 +269,7 @@ class MealSection {
         this.searchFiltersSection.classList.remove('hidden');
         this.mealCategoriesSection.classList.remove('hidden');
         this.allRecipeSection.classList.remove('hidden');
+
     }
     hideSection() {
         this.searchFiltersSection.classList.add('hidden');
@@ -404,7 +406,6 @@ class MealSection {
         recipesCount.textContent = `Showing ${meals.length} recipes for ${term}`
         this.showMeals(meals)
     }
-
     showMeals(meals) {
         if (meals.length === 0) {
             this.recipesGrid.innerHTML = `<div class="flex flex-col items-center justify-center py-12 text-center">
@@ -465,15 +466,43 @@ class MealSection {
             this.recipesGrid.innerHTML = box;
             ////////////////////////IMPORTANT//////////////////////////////////
             //3shan myzhrsh 8air lma ykon feh meals n2dr nf7ha
-            mealDetails = new MealDetails();
+
         }
+        this.recipeCards = document.querySelectorAll('.recipe-card');
+        this.recipeCards.forEach(card => {
+            card.addEventListener('click', () => {
+                console.log('loggedMeal0', mealDetails.loggedMeal);
+
+                mealDetails.loggedMeal = {
+                    id_barcode: '',
+                    category: '',
+                    loggedAt: '',
+                    name: '',
+                    type: '',
+                    thumbnail: '',
+                    servings: '',
+                    nutrition: {
+                        calories: '',
+                        carbs: '',
+                        fat: '',
+                        protein: ''
+                    }
+                }
+                console.log('loggedMeal1', mealDetails.loggedMeal);
+                mealDetails.showSection();
+                mealDetails.getMealDetails(card.getAttribute('data-meal-id'));
+                console.log('loggedMeal2', mealDetails.loggedMeal);
+
+
+            })
+        });
     }
 }
 class MealDetails {
     constructor() {
         this.mealDetails = document.getElementById('meal-details');
         this.backToMealsBtn = document.getElementById('back-to-meals-btn');
-        this.recipeCards = document.querySelectorAll('.recipe-card');
+
         this.logMealBtn = document.getElementById('log-meal-btn');
 
 
@@ -501,12 +530,7 @@ class MealDetails {
                 protein: ''
             }
         }
-        this.recipeCards.forEach(card => {
-            card.addEventListener('click', () => {
-                this.showSection();
-                this.getMealDetails(card.getAttribute('data-meal-id'));
-            })
-        });
+
         this.backToMealsBtn.addEventListener('click', () => {
             this.hideSection();
         })
@@ -532,6 +556,13 @@ class MealDetails {
         this.currentMeal = null;
         this.confirmLogMeal.addEventListener('click', () => {
             var currentServing = Number(this.mealServings.value);
+            const now = new Date();
+            this.loggedMeal.loggedAt = `${(h => h % 12 || 12)(now.getHours())}:${now.getMinutes().toString().padStart(2, '0')} ${now.getHours() >= 12 ? 'PM' : 'AM'}`;
+            this.loggedMeal.servings = Number(this.mealServings.value);
+            console.log('Before Fire:', this.loggedMeal);
+
+            foodLogSection.logMeal(this.loggedMeal);
+
             Swal.fire({
                 title: "Meal logged",
                 icon: "success",
@@ -546,12 +577,11 @@ class MealDetails {
                 timerProgressBar: true     // Display a progress bar showing the countdown until the alert closes
 
             });
+
             this.logMealModal.classList.add('loading');
 
-            const now = new Date();
-            this.loggedMeal.loggedAt = `${(h => h % 12 || 12)(now.getHours())}:${now.getMinutes().toString().padStart(2, '0')} ${now.getHours() >= 12 ? 'PM' : 'AM'}`;
-            this.loggedMeal.servings = Number(this.mealServings.value);
-            foodLogSection.logMeal(this.loggedMeal);
+
+
         });
 
         this.logMealModal.addEventListener('click', (e) => {
@@ -938,6 +968,9 @@ class MealDetails {
 //=========
 class FoodLogSection {
     constructor() {
+
+
+
         this.foodlogSection = document.getElementById('foodlog-section');
         this.foodlogTodayDate = document.getElementById('foodlog-date');
         this.emptyLogSection = document.getElementById('no-log-meals');
@@ -966,21 +999,34 @@ class FoodLogSection {
             this.loggedMeals.meals = JSON.parse(localStorage.getItem('loggedMeals'));
         }
 
-        //bind
+        //bind Clear ALL button
         this.clearFoodlogBtn.addEventListener('click', () => {
-            //Clear loggedMeals
-            this.loggedMeals = {
-                totalCalories: 0,
-                totalProtein: 0,
-                totalCarbs: 0,
-                totalFat: 0,
-                meals: []
-            }
-            //clear Local Storage
-            localStorage.setItem('loggedMeals', JSON.stringify(this.loggedMeals.meals));
-
-            this.showLoggedMeals();
+            Swal.fire({
+                title: "Clear Today's Log?",
+                text: "This will remove all logged food items for today.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Yes, clear it!",
+                cancelButtonText: "Cancel",
+                confirmButtonColor: "#dc2626", // red
+                cancelButtonColor: "#9ca3af"   // optional: gray
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Clear loggedMeals
+                    this.loggedMeals = {
+                        totalCalories: 0,
+                        totalProtein: 0,
+                        totalCarbs: 0,
+                        totalFat: 0,
+                        meals: []
+                    };
+                    localStorage.setItem('loggedMeals', JSON.stringify(this.loggedMeals.meals));
+                    this.showLoggedMeals();
+                    Swal.fire("Cleared!", "Food log has been cleared.", "success");
+                }
+            });
         });
+
         this.hideSection();
     }
     showSection() {
@@ -998,9 +1044,19 @@ class FoodLogSection {
     hideSection() {
         this.foodlogSection.classList.add('hidden');
     }
+
+
     logMeal(meal) {
         // Load previous meals from localStorage if any
+        console.log('logged before Add', this.loggedMeals);
         if (localStorage.getItem('loggedMeals')) {
+            this.loggedMeals = {
+                totalCalories: 0,
+                totalProtein: 0,
+                totalCarbs: 0,
+                totalFat: 0,
+                meals: []
+            }
             this.loggedMeals.meals = JSON.parse(localStorage.getItem('loggedMeals'));
         }
         else {
@@ -1012,12 +1068,21 @@ class FoodLogSection {
                 meals: []
             }
         }
+        console.log('logged afer Add', this.loggedMeals);
+
         // Add the new meal
         this.loggedMeals.meals.push(meal);
         // Update localStorage
         localStorage.setItem('loggedMeals', JSON.stringify(this.loggedMeals.meals));
     }
     showLoggedMeals() {
+        this.loggedMeals = {
+            totalCalories: 0,
+            totalProtein: 0,
+            totalCarbs: 0,
+            totalFat: 0,
+            meals: []
+        }
         if (localStorage.getItem('loggedMeals')) {
             this.loggedMeals.meals = JSON.parse(localStorage.getItem('loggedMeals'));
 
@@ -1120,39 +1185,137 @@ class FoodLogSection {
 
         }
         else {
-            this.loggedItemsList.innerHTML = ` <div id="no-log-meals" class="text-center py-8 text-gray-500">
-                <i class="fa-solid fa-utensils text-4xl mb-3 text-gray-300"></i>
-                <p class="font-medium">No meals logged today</p>
-                <p class="text-sm">
-                  Add meals from the Meals page or scan products
-                </p>
-              </div>`
+            this.loggedItemsList.innerHTML = `
+               <div id="no-log-meals" class="text-center py-8 text-gray-500">
+                <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <i class="text-3xl text-gray-300 fa fa-utensils">
+                  </i>
+                </div>
+                <p class="text-gray-500 font-medium mb-2">No food logged today</p>
+                <p class="text-gray-400 text-sm mb-4">Start tracking your nutrition by logging meals or scanning
+                  products</p>
+                <div class="flex justify-center gap-3">
+                  <button id="browse-recipes-btn"
+                    class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-all">
+                    <i class="fa fa-plus"></i>
+                    Browse Recipes
+                  </button>
+                  <button id="scan-product-btn"
+                    class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all">
+                    <i class="fa fa-barcode"> </i>
+                    Scan Product
+                  </button>
+                </div>
+              </div>
+            `;
+            document.getElementById('browse-recipes-btn').addEventListener('click', () => {
+                sectionsNavigation.setActiveSection('home');
+                showCurrentSection('home');
+            });
+
+            document.getElementById('scan-product-btn').addEventListener('click', () => {
+                sectionsNavigation.setActiveSection('products');
+                showCurrentSection('products');
+            });
             this.clearFoodlogBtn.classList.add('hidden');
         }
         if (this.loggedMeals.meals.length <= 0) {
-            this.loggedItemsList.innerHTML = ` <div id="no-log-meals" class="text-center py-8 text-gray-500">
-                <i class="fa-solid fa-utensils text-4xl mb-3 text-gray-300"></i>
-                <p class="font-medium">No meals logged today</p>
-                <p class="text-sm">
-                  Add meals from the Meals page or scan products
-                </p>
-              </div>`
+            this.loggedItemsList.innerHTML = `
+             <div id="no-log-meals" class="text-center py-8 text-gray-500">
+                <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <i class="text-3xl text-gray-300 fa fa-utensils">
+                  </i>
+                </div>
+                <p class="text-gray-500 font-medium mb-2">No food logged today</p>
+                <p class="text-gray-400 text-sm mb-4">Start tracking your nutrition by logging meals or scanning
+                  products</p>
+                <div class="flex justify-center gap-3">
+                  <button id="browse-recipes-btn"
+                    class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-all">
+                    <i class="fa fa-plus"></i>
+                    Browse Recipes
+                  </button>
+                  <button id="scan-product-btn"
+                    class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all">
+                    <i class="fa fa-barcode"> </i>
+                    Scan Product
+                  </button>
+                </div>
+              </div>
+            `;
+            document.getElementById('browse-recipes-btn').addEventListener('click', () => {
+                sectionsNavigation.setActiveSection('home');
+                showCurrentSection('home');
+            });
+
+            document.getElementById('scan-product-btn').addEventListener('click', () => {
+                sectionsNavigation.setActiveSection('products');
+                showCurrentSection('products');
+            });
             this.clearFoodlogBtn.classList.add('hidden');
         }
     }
     deleteItem(indexToRemove) {
-        this.loggedMeals.totalCalories = 0;
-        this.loggedMeals.totalProtein = 0;
-        this.loggedMeals.totalFat = 0;
-        this.loggedMeals.totalCarbs = 0;
-        this.loggedMeals.meals.splice(indexToRemove, 1);
-        localStorage.setItem('loggedMeals', JSON.stringify(this.loggedMeals.meals));
-        this.showLoggedMeals();
+        const notyf = new Notyf({
+            position: {
+                x: 'right',
+                y: 'bottom',
+            },
+            types: [
+                {
+                    type: 'success',
+                    background: '#2563eb',
+                    icon: false
+                },
+                {
+                    type: 'error',
+                    background: '#dc2626',
+                    icon: false
+                }
+            ]
+        });
+        try {
+            this.loggedMeals.totalCalories = 0;
+            this.loggedMeals.totalProtein = 0;
+            this.loggedMeals.totalFat = 0;
+            this.loggedMeals.totalCarbs = 0;
+            this.loggedMeals.meals.splice(indexToRemove, 1);
+            localStorage.setItem('loggedMeals', JSON.stringify(this.loggedMeals.meals));
+            this.showLoggedMeals();
+            notyf.success('Item removed from log');
+        }
+        catch (error) {
+            notyf.error('Failed to remove produc');
+        }
     }
 }
 
 class ProductsSection {
     constructor() {
+        // this.categoriesBGColors = {
+        //     breakfast_cereals: 'bg-gradient-to-r from-amber-500 to-orange-500',
+        //     beverages: 'bg-gradient-to-r from-blue-500 to-cyan-500',
+        //     snacks: 'bg-gradient-to-r from-purple-500 to-pink-500',
+        //     dairy: 'bg-gradient-to-r from-sky-400 to-blue-500',
+        //     fruits: 'bg-gradient-to-r from-red-500 to-rose-500',
+        //     vegetables: 'bg-gradient-to-r from-green-500 to-emerald-500',
+        //     breads: 'bg-gradient-to-r from-amber-600 to-yellow-500',
+        //     meats: 'bg-gradient-to-r from-red-600 to-rose-600',
+        //     frozen_foods: 'bg-gradient-to-r from-cyan-500 to-blue-600',
+        //     sauces: 'bg-gradient-to-r from-orange-500 to-red-500'
+        // };
+        this.categoriesBGColors = [
+            'bg-gradient-to-r from-amber-500 to-orange-500', // 0
+            'bg-gradient-to-r from-blue-500 to-cyan-500',    // 1
+            'bg-gradient-to-r from-purple-500 to-pink-500',  // 2
+            'bg-gradient-to-r from-sky-400 to-blue-500',     // 3
+            'bg-gradient-to-r from-red-500 to-rose-500',     // 4
+            'bg-gradient-to-r from-green-500 to-emerald-500',// 5
+            'bg-gradient-to-r from-amber-600 to-yellow-500', // 6
+            'bg-gradient-to-r from-red-600 to-rose-600',     // 7
+            'bg-gradient-to-r from-cyan-500 to-blue-600',    // 8
+            'bg-gradient-to-r from-orange-500 to-red-500'    // 9
+        ];
         this.isProducts = false;
         this.products = [];
 
@@ -1240,13 +1403,13 @@ class ProductsSection {
         //using Categories
         this.categoriesButtons.forEach(btn => {
             btn.addEventListener('click', () => {
-                let term = btn.getAttribute('data-category').replace('_', ' ');
+                let categoryName = btn.getAttribute('data-category');
                 this.productsEmpty.classList.add('hidden');
                 this.productsGrid.classList.add('hidden');
                 this.productsLoading.classList.remove('hidden');
-                this.SearchProduct(term);
+                this.filterByCategory(categoryName);
             });
-        })
+        });
         //nutri-score-filter All A B C D E
         this.nutriScoreFilterButtons.forEach(btn => {
             btn.addEventListener('click', () => {
@@ -1266,12 +1429,51 @@ class ProductsSection {
 
         this.hideSection();
     }
-    showSection() {
+    async showSection() {
+
+        // Uncomment the line below if you want to call get Categories from the API (not static categories)
+        //await this.getCatigories();
         //show sections
         this.productsSection.classList.remove('hidden');
+
     }
     hideSection() {
         this.productsSection.classList.add('hidden');
+    }
+
+    async getCatigories() {
+        try {
+            let response = await fetch('https://nutriplan-api.vercel.app/api/products/categories');
+            let resultJson = await response.json();
+            let categorires = resultJson.results;
+            const productCategoryContainer = document.getElementById('product-categories-container');
+            let box = ``;
+            for (let i = 0; i < 10; i++) {
+                box += `
+                 <button
+              class="product-category-btn flex-shrink-0 px-5 py-3 ${this.categoriesBGColors[i]} text-white rounded-xl font-semibold hover:shadow-lg transition-all"
+              data-category=${categorires[i].name}>
+              <i class="mr-2 fa fa-wheat-awn"></i>${categorires[i].name}
+            </button>`;
+            }
+            productCategoryContainer.innerHTML = box;
+            //update buttons
+            this.categoriesButtons = document.querySelectorAll('.product-category-btn');
+            //using Categories
+            this.categoriesButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    let categoryName = btn.getAttribute('data-category').replace('_', ' ');
+                    this.productsEmpty.classList.add('hidden');
+                    this.productsGrid.classList.add('hidden');
+                    this.productsLoading.classList.remove('hidden');
+                    this.filterByCategory(categoryName)
+                });
+            });
+
+        }
+        catch (error) {
+            console.log(error);
+        }
     }
     async SearchProduct(term = '') {
         try {
@@ -1314,6 +1516,26 @@ class ProductsSection {
             this.products = products
             this.fillProductsGrid(products);
             console.log('oooo');
+
+        }
+        catch (error) {
+            console.log(error);
+        }
+    }
+
+    async filterByCategory(categoryName) {
+        try {
+            let response = await fetch(`https://nutriplan-api.vercel.app/api/products/category/${categoryName}`);
+            let resultJson = await response.json();
+            let filteredProducts = resultJson.results;
+            console.log(filteredProducts);
+            console.log('call show by category');
+            this.productsEmpty.classList.add('hidden');
+            this.productsGrid.classList.remove('hidden');
+            this.productsLoading.classList.add('hidden')
+            this.fillProductsGrid(filteredProducts);
+
+            console.log('show by category');
 
         }
         catch (error) {
@@ -1406,6 +1628,7 @@ class ProductsSection {
         const filtered = this.products.filter(product => product.nutritionGrade === grade);
         this.fillProductsGrid(filtered);
     }
+
 
     async fillProductModal(barcode) {
 
@@ -1590,10 +1813,41 @@ class ProductsSection {
         this.logProductBtn = document.querySelectorAll('.add-product-to-log');
         this.logProductBtn.forEach(btn => {
             btn.addEventListener('click', () => {
-                this.productdetailModal.classList.add('loading');
-                const now = new Date();
-                this.loggedProduct.loggedAt = `${(h => h % 12 || 12)(now.getHours())}:${now.getMinutes().toString().padStart(2, '0')} ${now.getHours() >= 12 ? 'PM' : 'AM'}`;
-                foodLogSection.logMeal(this.loggedProduct);
+                const notyf = new Notyf({
+                    position: { x: 'right', y: 'bottom' },
+                    types: [
+                        {
+                            type: 'success',
+                            background: '#1db882',
+                            icon: {
+                                className: 'fa fa-clipboard-list',
+                                tagName: 'i',
+                                color: '#fff'
+                            }
+                        },
+                        {
+                            type: 'error',
+                            background: '#dc2626',
+                            icon: {
+                                className: 'fas fa-times',
+                                tagName: 'i',
+                                color: '#fff'
+                            }
+                        }
+                    ]
+                });
+
+
+                try {
+                    this.productdetailModal.classList.add('loading');
+                    const now = new Date();
+                    this.loggedProduct.loggedAt = `${(h => h % 12 || 12)(now.getHours())}:${now.getMinutes().toString().padStart(2, '0')} ${now.getHours() >= 12 ? 'PM' : 'AM'}`;
+                    foodLogSection.logMeal(this.loggedProduct);
+                    notyf.success(`${this.loggedProduct.name} to your daily intake!`)
+                }
+                catch (error) {
+
+                }
             })
         });
 
@@ -1608,7 +1862,7 @@ const sidebar = new Sidebar();
 const sectionsNavigation = new SectionsNavigation();
 
 const mealSection = new MealSection();
-let mealDetails;
+const mealDetails = new MealDetails();
 const productsSection = new ProductsSection();
 const foodLogSection = new FoodLogSection();
 

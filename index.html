@@ -20,6 +20,12 @@
   <script src="https://cdn.plot.ly/plotly-3.1.1.min.js"></script>
   <link rel="stylesheet" href="src/css/index.css" />
   <link rel="stylesheet" href="src/css/style.css" />
+
+  <!-- SweetAlert CSS  -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+  <!-- Notfy -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf/notyf.min.css">
 </head>
 
 <body class="bg-gray-50 font-sans">
@@ -673,7 +679,7 @@
         <!-- Category Buttons -->
         <div class="mb-6">
           <h3 class="text-lg font-semibold text-gray-900 mb-3">Browse by Category</h3>
-          <div class="flex gap-3 overflow-x-auto pb-2">
+          <div id='product-categories-container' class="flex gap-3 overflow-x-auto pb-2">
 
             <button
               class="product-category-btn flex-shrink-0 px-5 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
@@ -952,7 +958,7 @@
           <!-- Logged Items -->
           <div class="border-t border-gray-200 pt-4">
             <div class="flex items-center justify-between mb-3">
-              <h4  id="logged-meal-count" class="text-sm font-semibold text-gray-700">
+              <h4 id="logged-meal-count" class="text-sm font-semibold text-gray-700">
                 Logged Items (0)
               </h4>
               <button id="clear-foodlog" class="text-red-500 hover:text-red-600 text-sm font-medium">
@@ -963,11 +969,25 @@
             <div id="logged-items-list" class="space-y-3 max-h-96 overflow-y-auto">
               <!-- Empty State -->
               <div id="no-log-meals" class="text-center py-8 text-gray-500">
-                <i class="fa-solid fa-utensils text-4xl mb-3 text-gray-300"></i>
-                <p class="font-medium">No meals logged today</p>
-                <p class="text-sm">
-                  Add meals from the Meals page or scan products
-                </p>
+                <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <i class="text-3xl text-gray-300 fa fa-utensils">
+                  </i>
+                </div>
+                <p class="text-gray-500 font-medium mb-2">No food logged today</p>
+                <p class="text-gray-400 text-sm mb-4">Start tracking your nutrition by logging meals or scanning
+                  products</p>
+                <div class="flex justify-center gap-3">
+                  <button id="browse-recipes-btn"
+                    class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-all">
+                    <i class="fa fa-plus"></i>
+                    Browse Recipes
+                  </button>
+                  <button id="scan-product-btn"
+                    class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all">
+                    <i class="fa fa-barcode"> </i>
+                    Scan Product
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -1031,8 +1051,8 @@
   <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 loading" id="log-meal-modal">
     <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4">
       <div class="flex items-center gap-4 mb-6">
-        <img id="modal-image" src="https://www.themealdb.com/images/media/meals/wyxwsp1486979827.jpg" alt="Chicken Handi"
-          class="w-16 h-16 rounded-xl object-cover">
+        <img id="modal-image" src="https://www.themealdb.com/images/media/meals/wyxwsp1486979827.jpg"
+          alt="Chicken Handi" class="w-16 h-16 rounded-xl object-cover">
         <div>
           <h3 class="text-xl font-bold text-gray-900">Log This Meal</h3>
           <p id='log-meal-modal-title' class="text-gray-500 text-sm">Chicken Handi</p>
@@ -1250,14 +1270,17 @@
     </div>
   </div>
 
-  <!-- SweetAlert CSS  -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+  <!-- Notyf JS -->
+  <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
 
   <!-- SweetAlert JS -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <!-- Main JavaScript Entry Point -->
   <script type="module" src="src/js/main.js"></script>
+
+
 </body>
 
 </html>
