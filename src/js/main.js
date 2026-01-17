@@ -1241,6 +1241,9 @@ class ProductsSection {
         this.categoriesButtons.forEach(btn => {
             btn.addEventListener('click', () => {
                 let term = btn.getAttribute('data-category').replace('_', ' ');
+                this.productsEmpty.classList.add('hidden');
+                this.productsGrid.classList.add('hidden');
+                this.productsLoading.classList.remove('hidden');
                 this.SearchProduct(term);
             });
         })
@@ -1270,7 +1273,7 @@ class ProductsSection {
     hideSection() {
         this.productsSection.classList.add('hidden');
     }
-    async SearchProduct(term='') {
+    async SearchProduct(term = '') {
         try {
             let value = (this.productSearchInput.value || term).toLowerCase();
 
