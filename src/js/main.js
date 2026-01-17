@@ -1040,7 +1040,7 @@ class FoodLogSection {
                                 <p class="text-sm text-gray-500">
                                     ${this.loggedMeals.meals[i].servings} serving
                                     <span class="mx-1">•</span>
-                                    <span class="text-emerald-600">Recipe</span>
+                                    <span class="text-emerald-600">${this.loggedMeals.meals[i].type}</span>
                                 </p>
                                 <p class="text-xs text-gray-400 mt-1">${this.loggedMeals.meals[i].loggedAt}</p>
                             </div>
