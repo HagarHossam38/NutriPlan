@@ -1121,6 +1121,48 @@ class FoodLogSection {
                 showCurrentSection('products');
             });
             this.clearFoodlogBtn.classList.add('hidden');
+            this.showWeeklyProgress();
+            this.loggedMealCount.innerHTML = `Logged Items (0)`
+            this.logProgressBars.innerHTM = `     <!-- Calories Progress -->
+            <div class="bg-emerald-50 rounded-xl p-4">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-semibold text-gray-700">Calories</span>
+                <span class="text-sm text-gray-500">0 / 2000 kcal</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div class="bg-emerald-500 h-2.5 rounded-full" style="width: 0%"></div>
+              </div>
+            </div>
+            <!-- Protein Progress -->
+            <div class="bg-blue-50 rounded-xl p-4">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-semibold text-gray-700">Protein</span>
+                <span class="text-sm text-gray-500">0 / 50 g</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div class="bg-blue-500 h-2.5 rounded-full" style="width: 0%"></div>
+              </div>
+            </div>
+            <!-- Carbs Progress -->
+            <div class="bg-amber-50 rounded-xl p-4">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-semibold text-gray-700">Carbs</span>
+                <span class="text-sm text-gray-500">0 / 250 g</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div class="bg-amber-500 h-2.5 rounded-full" style="width: 0%"></div>
+              </div>
+            </div>
+            <!-- Fat Progress -->
+            <div class="bg-purple-50 rounded-xl p-4">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-semibold text-gray-700">Fat</span>
+                <span class="text-sm text-gray-500">0 / 65 g</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div class="bg-purple-500 h-2.5 rounded-full" style="width: 0%"></div>
+              </div>
+            </div>`;
             return;
         }
 
@@ -1291,7 +1333,6 @@ class FoodLogSection {
 
             dailyLog[today].meals = this.loggedMeals.meals;
             this.saveDailyLog(dailyLog);
-
             this.showLoggedMeals();
             notyf.success('Item removed from log');
         }
@@ -1328,7 +1369,13 @@ class FoodLogSection {
     showWeeklyProgress() {
         const chartContainer = document.getElementById('weekly-chart');
         const loggedDays = JSON.parse(localStorage.getItem('nutriplan_daily_log')) || {};
-
+        if (loggedDays == null || loggedDays.length == 0) {
+            //emptyCase
+            document.getElementById('weekly-chart').innerHTML = ` <div class="text-center text-gray-400">
+              <i class="fa-solid fa-chart-line text-4xl mb-2"></i>
+              <p>Weekly nutrition chart will appear here</p>
+            </div>`
+        }
         const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
         const today = new Date();
         const chartDays = [];
@@ -1385,11 +1432,7 @@ class FoodLogSection {
 
 
 
-        //emptyCase
-        // document.getElementById('weekly-chart').innerHTML = ` <div class="text-center text-gray-400">
-        //       <i class="fa-solid fa-chart-line text-4xl mb-2"></i>
-        //       <p>Weekly nutrition chart will appear here</p>
-        //     </div>`
+
     }
 }
 
