@@ -1369,7 +1369,7 @@ class FoodLogSection {
     showWeeklyProgress() {
         const chartContainer = document.getElementById('weekly-chart');
         const loggedDays = JSON.parse(localStorage.getItem('nutriplan_daily_log')) || {};
-        if (loggedDays == null || loggedDays.length == 0) {
+        if (!loggedDays) {
             //emptyCase
             document.getElementById('weekly-chart').innerHTML = ` <div class="text-center text-gray-400">
               <i class="fa-solid fa-chart-line text-4xl mb-2"></i>
