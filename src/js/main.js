@@ -738,7 +738,7 @@ class MealDetails {
             // let nutritionData = nutritionJson.breakdown;
 
 
-            await this.fillNutritionData(nutritionJson);
+            await this.fillNutritionData(nutritionJson.data);
             this.hideLoadingDesign();
         }
         catch (error) {
@@ -755,7 +755,6 @@ class MealDetails {
         image.alt = meal.name;
         //=>>>>>>>>>
         document.getElementById('hero-time').textContent = `30 minutes`
-
         // //===ingredients===/
         const mealIngredientsGrid = document.getElementById('meal-ingredients-grid');
         const mealIngredients = meal.ingredients;
@@ -801,11 +800,10 @@ class MealDetails {
         this.loggedMeal.type = 'Recipe';
 
 
-
-
     }
     async fillNutritionData(nutrition) {
-        let food = nutrition.breakdown;
+        let food = nutrition.perServing;
+        document.getElementById('hero-servings').textContent = `${nutrition.servings} servings`
         const nutitionInfo = {
             'Protein': 0,
             'Carbs': 0,
@@ -816,35 +814,43 @@ class MealDetails {
             'Sodium': 0,
             'Calories': 0
         }
-        for (let i = 0; i < food.length; i++) {
-            try {
-                let foodTosearch = food[i].match.replace('/', '');
-                // console.log(foodTosearch);
+        nutitionInfo['Protein'] = food.protein;
+        nutitionInfo['Calories'] = food.calories;
+        nutitionInfo['Carbs'] = food.carbs;
+        nutitionInfo['Fats'] = food.fat;
+        nutitionInfo['Fiber'] = food.fiber;
+        nutitionInfo['Sodium'] = food.sodium;
+        nutitionInfo['Saturated_Fat'] = food.saturatedFat;
+        nutitionInfo['Sugar'] = food.sugar;
+        // for (let i = 0; i < food.length; i++) {
+        //     try {
+        //         let foodTosearch = food[i].match.replace('/', '');
+        //         // console.log(foodTosearch);
 
-                let response = await fetch(`https://nutriplan-api.vercel.app/api/nutrition/search?q=${food[i].foodTosearch}=1&limit=24`,
-                    {
-                        headers: {
-                            'x-api-key': 'rMVu4aYBEzDZBvY5OHio1vk9tObxaIIxd0G4Ld0k'
-                        }
-                    });
+        //         let response = await fetch(`https://nutriplan-api.vercel.app/api/nutrition/search?q=${food[i].foodTosearch}=1&limit=24`,
+        //             {
+        //                 headers: {
+        //                     'x-api-key': 'rMVu4aYBEzDZBvY5OHio1vk9tObxaIIxd0G4Ld0k'
+        //                 }
+        //             });
 
 
-                const responseJson = await response.json();
-                let ingredient = responseJson.results[0];
-                nutitionInfo['Protein'] += ingredient.nutrients.protein;
-                nutitionInfo['Calories'] += ingredient.nutrients.calories;
-                nutitionInfo['Carbs'] += ingredient.nutrients.carbs;
-                nutitionInfo['Fats'] += ingredient.nutrients.fat;
-                nutitionInfo['Fiber'] += ingredient.nutrients.fiber;
-                nutitionInfo['Sodium'] += ingredient.nutrients.sodium;
-                nutitionInfo['Sugar'] += ingredient.nutrients.sugar;
-            }
+        //         const responseJson = await response.json();
+        //         let ingredient = responseJson.results[0];
+        //         nutitionInfo['Protein'] += ingredient.nutrients.protein;
+        //         nutitionInfo['Calories'] += ingredient.nutrients.calories;
+        //         nutitionInfo['Carbs'] += ingredient.nutrients.carbs;
+        //         nutitionInfo['Fats'] += ingredient.nutrients.fat;
+        //         nutitionInfo['Fiber'] += ingredient.nutrients.fiber;
+        //         nutitionInfo['Sodium'] += ingredient.nutrients.sodium;
+        //         nutitionInfo['Sugar'] += ingredient.nutrients.sugar;
+        //     }
 
-            catch (error) {
-                console.log(error);
-            }
+        //     catch (error) {
+        //         console.log(error);
+        //     }
 
-        }
+        // }
         console.log(nutitionInfo);
         //====nutrition-facts-container====
         console.log(`nutritionFactsContainer`);
@@ -861,7 +867,7 @@ class MealDetails {
                 <div class="text-center py-4 mb-4 bg-linear-to-br from-emerald-50 to-teal-50 rounded-xl">
                   <p class="text-sm text-gray-600">Calories per serving</p>
                   <p class="text-4xl font-bold text-emerald-600">${nutitionInfo.Calories}</p>
-                  <p class="text-xs text-gray-500 mt-1">Total: ${nutitionInfo.Calories * 4} cal</p>
+                  <p class="text-xs text-gray-500 mt-1">Total: ${nutitionInfo.Calories * nutrition.servings} cal</p>
                 </div>
 
                 <div class="space-y-4">
@@ -995,9 +1001,6 @@ class FoodLogSection {
             totalFat: 0,
             meals: []
         }
-        if (localStorage.getItem('loggedMeals')) {
-            this.loggedMeals.meals = JSON.parse(localStorage.getItem('loggedMeals'));
-        }
 
         //bind Clear ALL button
         this.clearFoodlogBtn.addEventListener('click', () => {
@@ -1020,13 +1023,18 @@ class FoodLogSection {
                         totalFat: 0,
                         meals: []
                     };
-                    localStorage.setItem('loggedMeals', JSON.stringify(this.loggedMeals.meals));
+                    const today = this.getTodayKey();
+                    const dailyLog = this.getDailyLog();
+
+                    delete dailyLog[today];
+                    localStorage.setItem('nutriplan_daily_log', JSON.stringify(dailyLog));
+
                     this.showLoggedMeals();
                     Swal.fire("Cleared!", "Food log has been cleared.", "success");
                 }
             });
         });
-
+        this.showLoggedMeals();
         this.hideSection();
     }
     showSection() {
@@ -1048,33 +1056,25 @@ class FoodLogSection {
 
     logMeal(meal) {
         // Load previous meals from localStorage if any
-        console.log('logged before Add', this.loggedMeals);
-        if (localStorage.getItem('loggedMeals')) {
-            this.loggedMeals = {
-                totalCalories: 0,
-                totalProtein: 0,
-                totalCarbs: 0,
-                totalFat: 0,
-                meals: []
-            }
-            this.loggedMeals.meals = JSON.parse(localStorage.getItem('loggedMeals'));
-        }
-        else {
-            this.loggedMeals = {
-                totalCalories: 0,
-                totalProtein: 0,
-                totalCarbs: 0,
-                totalFat: 0,
-                meals: []
-            }
-        }
-        console.log('logged afer Add', this.loggedMeals);
 
+        const today = this.getTodayKey();
+        const dailyLog = this.getDailyLog();
+        if (!dailyLog[today]) {
+            dailyLog[today] = {
+                totalCalories: 0,
+                totalProtein: 0,
+                totalCarbs: 0,
+                totalFat: 0,
+                meals: []
+            }
+        }
         // Add the new meal
-        this.loggedMeals.meals.push(meal);
+        dailyLog[today].meals.push(meal);
         // Update localStorage
-        localStorage.setItem('loggedMeals', JSON.stringify(this.loggedMeals.meals));
+        this.saveDailyLog(dailyLog);
+        this.showLoggedMeals();
     }
+
     showLoggedMeals() {
         this.loggedMeals = {
             totalCalories: 0,
@@ -1083,143 +1083,11 @@ class FoodLogSection {
             totalFat: 0,
             meals: []
         }
-        if (localStorage.getItem('loggedMeals')) {
-            this.loggedMeals.meals = JSON.parse(localStorage.getItem('loggedMeals'));
+        const today = this.getTodayKey();
+        const dailyLog = this.getDailyLog();
 
-            this.emptyLogSection.classList.add('hidden');
-            this.clearFoodlogBtn.classList.remove('hidden');
-            this.loggedMealCount.innerHTML = `Logged Items (${this.loggedMeals.meals.length})`
-
-            let box = ``;
-            for (let i = 0; i < this.loggedMeals.meals.length; i++) {
-                this.loggedMeals.totalCalories += Number(this.loggedMeals.meals[i].nutrition.calories) * Number(this.loggedMeals.meals[i].servings);
-                this.loggedMeals.totalProtein += Number(this.loggedMeals.meals[i].nutrition.protein) * Number(this.loggedMeals.meals[i].servings);
-                this.loggedMeals.totalFat += Number(this.loggedMeals.meals[i].nutrition.fat) * Number(this.loggedMeals.meals[i].servings);
-                this.loggedMeals.totalCarbs += Number(this.loggedMeals.meals[i].nutrition.carbs) * Number(this.loggedMeals.meals[i].servings);
-                box += `
-                <div class="flex items-center justify-between bg-gray-50 rounded-xl p-4 hover:bg-gray-100 transition-all">
-                        <div class="flex items-center gap-4">
-                            <img src="${this.loggedMeals.meals[i].thumbnail}" alt="${this.loggedMeals.meals[i].name}" class="w-14 h-14 rounded-xl object-cover">
-                            <div>
-                                <p class="font-semibold text-gray-900">${this.loggedMeals.meals[i].name}</p>
-                                <p class="text-sm text-gray-500">
-                                    ${this.loggedMeals.meals[i].servings} serving
-                                    <span class="mx-1">•</span>
-                                    <span class="text-emerald-600">${this.loggedMeals.meals[i].type}</span>
-                                </p>
-                                <p class="text-xs text-gray-400 mt-1">${this.loggedMeals.meals[i].loggedAt}</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-4">
-                            <div class="text-right">
-                                <p class="text-lg font-bold text-emerald-600">${Number(this.loggedMeals.meals[i].nutrition.calories) * Number(this.loggedMeals.meals[i].servings)}</p>
-                                <p class="text-xs text-gray-500">kcal</p>
-                            </div>
-                            <div class="hidden md:flex gap-2 text-xs text-gray-500">
-                                <span class="px-2 py-1 bg-blue-50 rounded">${Number(this.loggedMeals.meals[i].nutrition.protein) * Number(this.loggedMeals.meals[i].servings)}g P</span>
-                                <span class="px-2 py-1 bg-amber-50 rounded">${Number(this.loggedMeals.meals[i].nutrition.carbs) * Number(this.loggedMeals.meals[i].servings)}g C</span>
-                                <span class="px-2 py-1 bg-purple-50 rounded">${Number(this.loggedMeals.meals[i].nutrition.fat) * Number(this.loggedMeals.meals[i].servings)}g F</span>
-                            </div>
-                            <button class="remove-foodlog-item text-gray-400 hover:text-red-500 transition-all p-2" data-index="${i}")">
-                                <i class="fa fa-trash-can"></i>
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }
-            console.log(this.loggedMeals);
-            this.loggedItemsList.innerHTML = box;
-
-            this.removeIfoodlogItems = document.querySelectorAll('.remove-foodlog-item');
-            this.removeIfoodlogItems.forEach(btn => {
-                btn.addEventListener('click', () => {
-
-                    this.deleteItem(btn.getAttribute('data-index'))
-                })
-            })
-
-            //Update Progress bars 
-            this.logProgressBars.innerHTML = `
-
-                    <!-- Calories Progress -->
-            <div class="bg-emerald-50 rounded-xl p-4">
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-sm font-semibold text-gray-700">Calories</span>
-                <span class="text-sm text-gray-500">${this.loggedMeals.totalCalories} / 2000 kcal</span>
-              </div>
-              <div class="w-full bg-gray-200 rounded-full h-2.5">
-                <div class="bg-emerald-500 h-2.5 rounded-full" style="width: ${Math.min(Math.round((Number(this.loggedMeals.totalCalories) / 2000) * 100), 100)}%"></div>
-              </div>
-            </div>
-            <!-- Protein Progress -->
-            <div class="bg-blue-50 rounded-xl p-4">
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-sm font-semibold text-gray-700">Protein</span>
-                <span class="text-sm text-gray-500">${this.loggedMeals.totalProtein} / 50 g</span>
-              </div>
-              <div class="w-full bg-gray-200 rounded-full h-2.5">
-                <div class="bg-blue-500 h-2.5 rounded-full" style="width: ${Math.min(Math.round((Number(this.loggedMeals.totalProtein) / 50) * 100), 100)}%"></div>
-              </div>
-            </div>
-            <!-- Carbs Progress -->
-            <div class="bg-amber-50 rounded-xl p-4">
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-sm font-semibold text-gray-700">Carbs</span>
-                <span class="text-sm text-gray-500"> ${this.loggedMeals.totalCarbs}/ 250 g</span>
-              </div>
-              <div class="w-full bg-gray-200 rounded-full h-2.5">
-                <div class="bg-amber-500 h-2.5 rounded-full" style="width: ${Math.min(Math.round((Number(this.loggedMeals.totalCarbs) / 250) * 100), 100)}%"></div>
-              </div>
-            </div>
-            <!-- Fat Progress -->
-            <div class="bg-purple-50 rounded-xl p-4">
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-sm font-semibold text-gray-700">Fat</span>
-                <span class="text-sm text-gray-500">${this.loggedMeals.totalFat} / 65 g</span>
-              </div>
-              <div class="w-full bg-gray-200 rounded-full h-2.5">
-                <div class="bg-purple-500 h-2.5 rounded-full" style="width: ${Math.min(Math.round((Number(this.loggedMeals.totalFat) / 250) * 100), 100)}%"></div>
-              </div>
-            </div>
-            `;
-
-        }
-        else {
-            this.loggedItemsList.innerHTML = `
-               <div id="no-log-meals" class="text-center py-8 text-gray-500">
-                <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <i class="text-3xl text-gray-300 fa fa-utensils">
-                  </i>
-                </div>
-                <p class="text-gray-500 font-medium mb-2">No food logged today</p>
-                <p class="text-gray-400 text-sm mb-4">Start tracking your nutrition by logging meals or scanning
-                  products</p>
-                <div class="flex justify-center gap-3">
-                  <button id="browse-recipes-btn"
-                    class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-all">
-                    <i class="fa fa-plus"></i>
-                    Browse Recipes
-                  </button>
-                  <button id="scan-product-btn"
-                    class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all">
-                    <i class="fa fa-barcode"> </i>
-                    Scan Product
-                  </button>
-                </div>
-              </div>
-            `;
-            document.getElementById('browse-recipes-btn').addEventListener('click', () => {
-                sectionsNavigation.setActiveSection('home');
-                showCurrentSection('home');
-            });
-
-            document.getElementById('scan-product-btn').addEventListener('click', () => {
-                sectionsNavigation.setActiveSection('products');
-                showCurrentSection('products');
-            });
-            this.clearFoodlogBtn.classList.add('hidden');
-        }
-        if (this.loggedMeals.meals.length <= 0) {
+        if (!dailyLog[today] || dailyLog[today].meals.length === 0) {
+            // empty state
             this.loggedItemsList.innerHTML = `
              <div id="no-log-meals" class="text-center py-8 text-gray-500">
                 <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -1253,8 +1121,146 @@ class FoodLogSection {
                 showCurrentSection('products');
             });
             this.clearFoodlogBtn.classList.add('hidden');
+            return;
         }
+
+        this.loggedMeals.meals = dailyLog[today].meals;
+        this.emptyLogSection.classList.add('hidden');
+        this.clearFoodlogBtn.classList.remove('hidden');
+        this.loggedMealCount.innerHTML = `Logged Items (${this.loggedMeals.meals.length})`
+
+        let box = ``;
+        for (let i = 0; i < this.loggedMeals.meals.length; i++) {
+            this.loggedMeals.totalCalories += Number(this.loggedMeals.meals[i].nutrition.calories) * Number(this.loggedMeals.meals[i].servings);
+            this.loggedMeals.totalProtein += Number(this.loggedMeals.meals[i].nutrition.protein) * Number(this.loggedMeals.meals[i].servings);
+            this.loggedMeals.totalFat += Number(this.loggedMeals.meals[i].nutrition.fat) * Number(this.loggedMeals.meals[i].servings);
+            this.loggedMeals.totalCarbs += Number(this.loggedMeals.meals[i].nutrition.carbs) * Number(this.loggedMeals.meals[i].servings);
+            box += `
+                <div class="flex items-center justify-between bg-gray-50 rounded-xl p-4 hover:bg-gray-100 transition-all">
+                        <div class="flex items-center gap-4">
+                            <img src="${this.loggedMeals.meals[i].thumbnail}" alt="${this.loggedMeals.meals[i].name}" class="w-14 h-14 rounded-xl object-cover">
+                            <div>
+                                <p class="font-semibold text-gray-900">${this.loggedMeals.meals[i].name}</p>
+                                <p class="text-sm text-gray-500">
+                                    ${this.loggedMeals.meals[i].servings} serving
+                                    <span class="mx-1">•</span>
+                                    <span class="text-emerald-600">${this.loggedMeals.meals[i].type}</span>
+                                </p>
+                                <p class="text-xs text-gray-400 mt-1">${this.loggedMeals.meals[i].loggedAt}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="text-right">
+                                <p class="text-lg font-bold text-emerald-600">${Number(this.loggedMeals.meals[i].nutrition.calories) * Number(this.loggedMeals.meals[i].servings)}</p>
+                                <p class="text-xs text-gray-500">kcal</p>
+                            </div>
+                            <div class="hidden md:flex gap-2 text-xs text-gray-500">
+                                <span class="px-2 py-1 bg-blue-50 rounded">${Number(this.loggedMeals.meals[i].nutrition.protein) * Number(this.loggedMeals.meals[i].servings)}g P</span>
+                                <span class="px-2 py-1 bg-amber-50 rounded">${Number(this.loggedMeals.meals[i].nutrition.carbs) * Number(this.loggedMeals.meals[i].servings)}g C</span>
+                                <span class="px-2 py-1 bg-purple-50 rounded">${Number(this.loggedMeals.meals[i].nutrition.fat) * Number(this.loggedMeals.meals[i].servings)}g F</span>
+                            </div>
+                            <button class="remove-foodlog-item text-gray-400 hover:text-red-500 transition-all p-2" data-index="${i}")">
+                                <i class="fa fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+        }
+        console.log(this.loggedMeals);
+        this.loggedItemsList.innerHTML = box;
+
+        this.removeIfoodlogItems = document.querySelectorAll('.remove-foodlog-item');
+        this.removeIfoodlogItems.forEach(btn => {
+            btn.addEventListener('click', () => {
+
+                this.deleteItem(btn.getAttribute('data-index'))
+            })
+        })
+
+        //Update Progress bars 
+        this.logProgressBars.innerHTML = `
+
+                    <!-- Calories Progress -->
+            <div class="${((Number(this.loggedMeals.totalCalories) / 2000) * 100) > 100 ? 'bg-red-100' : '  bg-emerald-50'} rounded-xl p-4">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-semibold text-gray-700">Calories</span>
+                <span class="text-sm text-gray-500">${this.loggedMeals.totalCalories} / 2000 kcal</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div class="${((Number(this.loggedMeals.totalCalories) / 2000) * 100) > 100 ? 'bg-red-500' : '  bg-emerald-500'} bg-emerald-500 h-2.5 rounded-full" style="width: ${Math.min(Math.round((Number(this.loggedMeals.totalCalories) / 2000) * 100), 100)}%"></div>
+              </div>
+            </div>
+            <!-- Protein Progress -->
+            <div class="${((Number(this.loggedMeals.totalProtein) / 50) * 100) > 100 ? 'bg-red-100' : ' bg-blue-50'} rounded-xl p-4">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-semibold text-gray-700">Protein</span>
+                <span class="text-sm text-gray-500">${this.loggedMeals.totalProtein} / 50 g</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div class="${((Number(this.loggedMeals.totalProtein) / 50) * 100) > 100 ? 'bg-red-500' : ' bg-blue-500'} h-2.5 rounded-full" style="width: ${Math.min(Math.round((Number(this.loggedMeals.totalProtein) / 50) * 100), 100)}%"></div>
+              </div>
+            </div>
+            <!-- Carbs Progress -->
+            <div class="${((Number(this.loggedMeals.totalCarbs) / 250) * 100) > 100 ? 'bg-red-100' : '  bg-amber-50'} rounded-xl p-4">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-semibold text-gray-700">Carbs</span>
+                <span class="text-sm text-gray-500"> ${this.loggedMeals.totalCarbs}/ 250 g</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div class="${((Number(this.loggedMeals.totalCarbs) / 250) * 100) > 100 ? 'bg-red-500' : 'bg-amber-500'} h-2.5 rounded-full" style="width: ${Math.min(Math.round((Number(this.loggedMeals.totalCarbs) / 250) * 100), 100)}%"></div>
+              </div>
+            </div>
+
+            <!-- Fat Progress -->
+            <div class="${((Number(this.loggedMeals.totalFat) / 65) * 100) > 100 ? 'bg-red-100' : 'bg-purple-50'} rounded-xl p-4">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-semibold text-gray-700">Fat</span>
+                <span class="text-sm text-gray-500">${this.loggedMeals.totalFat} / 65 g</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div class="${((Number(this.loggedMeals.totalFat) / 65) * 100) > 100 ? 'bg-red-500' : 'bg-purple-500 '} h-2.5 rounded-full" style="width: ${Math.min(Math.round((Number(this.loggedMeals.totalFat) / 65) * 100), 100)}%"></div>
+              </div>
+            </div>
+            `;
+
+        this.showWeeklyProgress();
+        // if (this.loggedMeals.meals.length <= 0) {
+        //     this.loggedItemsList.innerHTML = `
+        //      <div id="no-log-meals" class="text-center py-8 text-gray-500">
+        //         <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        //           <i class="text-3xl text-gray-300 fa fa-utensils">
+        //           </i>
+        //         </div>
+        //         <p class="text-gray-500 font-medium mb-2">No food logged today</p>
+        //         <p class="text-gray-400 text-sm mb-4">Start tracking your nutrition by logging meals or scanning
+        //           products</p>
+        //         <div class="flex justify-center gap-3">
+        //           <button id="browse-recipes-btn"
+        //             class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-all">
+        //             <i class="fa fa-plus"></i>
+        //             Browse Recipes
+        //           </button>
+        //           <button id="scan-product-btn"
+        //             class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all">
+        //             <i class="fa fa-barcode"> </i>
+        //             Scan Product
+        //           </button>
+        //         </div>
+        //       </div>
+        //     `;
+        //     document.getElementById('browse-recipes-btn').addEventListener('click', () => {
+        //         sectionsNavigation.setActiveSection('home');
+        //         showCurrentSection('home');
+        //     });
+
+        //     document.getElementById('scan-product-btn').addEventListener('click', () => {
+        //         sectionsNavigation.setActiveSection('products');
+        //         showCurrentSection('products');
+        //     });
+        //     this.clearFoodlogBtn.classList.add('hidden');
+        // }
     }
+
     deleteItem(indexToRemove) {
         const notyf = new Notyf({
             position: {
@@ -1280,13 +1286,110 @@ class FoodLogSection {
             this.loggedMeals.totalFat = 0;
             this.loggedMeals.totalCarbs = 0;
             this.loggedMeals.meals.splice(indexToRemove, 1);
-            localStorage.setItem('loggedMeals', JSON.stringify(this.loggedMeals.meals));
+            const today = this.getTodayKey();
+            const dailyLog = this.getDailyLog();
+
+            dailyLog[today].meals = this.loggedMeals.meals;
+            this.saveDailyLog(dailyLog);
+
             this.showLoggedMeals();
             notyf.success('Item removed from log');
         }
         catch (error) {
             notyf.error('Failed to remove produc');
         }
+    }
+
+    getTodayKey() {
+        return new Date().toISOString().split('T')[0];
+    }
+    getDailyLog() {
+        return JSON.parse(localStorage.getItem('nutriplan_daily_log')) || {};
+    }
+
+    saveDailyLog(dailyLog) {
+        const today = this.getTodayKey();
+        //update Total Number:
+        dailyLog[today].totalCalories = 0
+        dailyLog[today].totalCarbs = 0;
+        dailyLog[today].totalFat = 0;
+        dailyLog[today].totalProtein = 0;
+
+
+
+        for (let i = 0; i < dailyLog[today].meals.length; i++) {
+            dailyLog[today].totalCalories += Number(dailyLog[today].meals[i].nutrition.calories) * Number(dailyLog[today].meals[i].servings);
+            dailyLog[today].totalCarbs += Number(dailyLog[today].meals[i].nutrition.carbs) * Number(dailyLog[today].meals[i].servings);
+            dailyLog[today].totalFat += Number(dailyLog[today].meals[i].nutrition.fat) * Number(dailyLog[today].meals[i].servings);
+            dailyLog[today].totalProtein += Number(dailyLog[today].meals[i].nutrition.protein) * Number(dailyLog[today].meals[i].servings);
+        }
+        localStorage.setItem('nutriplan_daily_log', JSON.stringify(dailyLog));
+    }
+    showWeeklyProgress() {
+        const chartContainer = document.getElementById('weekly-chart');
+        const loggedDays = JSON.parse(localStorage.getItem('nutriplan_daily_log')) || {};
+
+        const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const today = new Date();
+        const chartDays = [];
+
+        // last 7 days
+        for (let i = 6; i >= 0; i--) {
+            //lw el nahrda 18-01-2025 >> awl iteration htgeb yom 12-01-2026
+            const day = new Date();
+            day.setDate(today.getDate() - i);
+            const dayString = day.toISOString().split('T')[0]; // YYYY-MM-DD
+            chartDays.push({
+                date: day,
+                dayName: daysOfWeek[day.getDay()],
+                key: dayString, //18-01-2025
+                data: loggedDays[dayString] || null
+            });
+        }
+        console.log(chartDays);
+
+        //Build weekly desing
+
+        let gridBox = `<div class="grid grid-cols-7 gap-2">`; //opening tag for grid
+
+        for (let i = 0; i < chartDays.length; i++) {
+            let isToday = false;
+            let hasData = false;
+            if (chartDays[i].key === today.toISOString().split('T')[0]) {
+                isToday = true;
+            }
+            if (chartDays[i].data !== null) {
+                hasData = true;
+            }
+            gridBox += `<div class="text-center ${isToday ? 'bg-indigo-100 rounded-xl' : ''}">
+             <p class="text-xs text-gray-500 mb-1">${chartDays[i].dayName}</p>
+             <p class="text-sm font-medium text-gray-900">${chartDays[i].date.getDate()}</p>
+             <div class="mt-2 ${hasData ? 'text-emerald-600' : 'text-gray-300'}">
+                 <p class="text-lg font-bold">${hasData ? chartDays[i].data.totalCalories : 0}</p>
+                 <p class="text-xs">kcal</p>
+             </div>
+            ${hasData ? `<p class="text-xs text-gray-400 mt-1">${chartDays[i].data.meals.length} items</p>` : ''}
+         </div>`;
+
+        }
+        gridBox += `</div>`;//closing tag for grid 
+
+        chartContainer.innerHTML = gridBox;
+
+        //normal Case
+        // نفترض أن الـ localStorage مخزن كالوري لكل يوم كده:
+        // localStorage.setItem('dailyCalories', JSON.stringify({
+        //    '2026-01-18': { totalCalories: 1517, items: 3 },
+        //    '2026-01-16': { totalCalories: 1200, items: 2 },
+        // }));
+
+
+
+        //emptyCase
+        // document.getElementById('weekly-chart').innerHTML = ` <div class="text-center text-gray-400">
+        //       <i class="fa-solid fa-chart-line text-4xl mb-2"></i>
+        //       <p>Weekly nutrition chart will appear here</p>
+        //     </div>`
     }
 }
 
@@ -1916,9 +2019,5 @@ window.addEventListener('DOMContentLoaded', () => {
         sectionsNavigation.setActiveSection('home');
     }
 });
-
-
-
-
 
 
