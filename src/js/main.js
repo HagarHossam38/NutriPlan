@@ -764,19 +764,95 @@ class MealDetails {
                 }
             );
             // 4. Parse the JSON response from the nutrition API
-
             let nutritionJson = await nutriplanResponse.json();
             console.log('Post Result:', nutritionJson);
-
-            // let nutritionData = nutritionJson.breakdown;
-
-
             await this.fillNutritionData(nutritionJson.data);
             this.hideLoadingDesign();
         }
         catch (error) {
+            document.getElementById('hero-calories').textContent = 'Error :(';
+            const icon = this.logMealBtn.querySelector('i');
+            const newIcon = document.createElement('i');
+            newIcon.className = 'fa-solid fa-triangle-exclamation';
+            icon.replaceWith(newIcon);
+            this.logMealBtn.querySelector('span').textContent = `Error :(`
+            this.nutritionFactsContainer.innerHTML = `    <p class="text-sm text-gray-500 mb-4">Per serving</p>
+
+                <div class="text-center py-4 mb-4 bg-linear-to-br from-red-50 to-rose-50 rounded-xl">
+                  <p class="text-4xl font-bold text-red-600">failed</p>
+                </div>
+
+                <div class="space-y-4">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                      <div class="w-3 h-3 rounded-full bg-emerald-500"></div>
+                      <span class="text-gray-700">Protein</span>
+                    </div>
+                    <span class="font-bold text-gray-900">unknown</span>
+                  </div>
+                  <div class="w-full bg-gray-100 rounded-full h-2">
+                    <div class="bg-emerald-500 h-2 rounded-full" style="width: 0%"></div>
+                  </div>
+
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                      <div class="w-3 h-3 rounded-full bg-blue-500"></div>
+                      <span class="text-gray-700">Carbs</span>
+                    </div>
+                    <span class="font-bold text-gray-900">unknown</span>
+                  </div>
+                  <div class="w-full bg-gray-100 rounded-full h-2">
+                    <div class="bg-blue-500 h-2 rounded-full" style="width: 0%"></div>
+                  </div>
+
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                      <div class="w-3 h-3 rounded-full bg-purple-500"></div>
+                      <span class="text-gray-700">Fat</span>
+                    </div>
+                    <span class="font-bold text-gray-900">unknown</span>
+                  </div>
+                  <div class="w-full bg-gray-100 rounded-full h-2">
+                    <div class="bg-purple-500 h-2 rounded-full" style="width: 0%"></div>
+                  </div>
+
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                      <div class="w-3 h-3 rounded-full bg-orange-500"></div>
+                      <span class="text-gray-700">Fiber</span>
+                    </div>
+                    <span class="font-bold text-gray-900">unknown</span>
+                  </div>
+                  <div class="w-full bg-gray-100 rounded-full h-2">
+                    <div class="bg-orange-500 h-2 rounded-full" style="width: 0%"></div>
+                  </div>
+
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                      <div class="w-3 h-3 rounded-full bg-pink-500"></div>
+                      <span class="text-gray-700">Sugar</span>
+                    </div>
+                    <span class="font-bold text-gray-900">unknown</span>
+                  </div>
+                  <div class="w-full bg-gray-100 rounded-full h-2">
+                    <div class="bg-pink-500 h-2 rounded-full" style="width: 0%"></div>
+                  </div>
+
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                      <div class="w-3 h-3 rounded-full bg-emerald-500"></div>
+                      <span class="text-gray-700">Protein</span>
+                    </div>
+                    <span class="font-bold text-gray-900">unknown</span>
+                  </div>
+                  <div class="w-full bg-gray-100 rounded-full h-2">
+                    <div class="bg-emerald-500 h-2 rounded-full" style="width: 0%"></div>
+                  </div>
+
+                </div>`;
             console.log(error);
         }
+
     }
 
     async fillMealData(meal) {
@@ -975,30 +1051,6 @@ class MealDetails {
                 </div>
                 </div>
 
-                <div class="mt-6 pt-6 border-t border-gray-100">
-                  <h3 class="text-sm font-semibold text-gray-900 mb-3">
-                    Vitamins & Minerals (% Daily Value)
-                  </h3>
-                  <div class="grid grid-cols-2 gap-3 text-sm">
-                    <div class="flex justify-between">
-                      <span class="text-gray-600">Vitamin A</span>
-                      <span class="font-medium">15%</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-gray-600">Vitamin C</span>
-                      <span class="font-medium">25%</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-gray-600">Calcium</span>
-                      <span class="font-medium">4%</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-gray-600">Iron</span>
-                      <span class="font-medium">12%</span>
-                    </div>
-                  </div>
-                </div>
-
         `;
 
         //fill selected meal
@@ -1011,9 +1063,6 @@ class MealDetails {
 //=========
 class FoodLogSection {
     constructor() {
-
-
-
         this.foodlogSection = document.getElementById('foodlog-section');
         this.foodlogTodayDate = document.getElementById('foodlog-date');
         this.emptyLogSection = document.getElementById('no-log-meals');
@@ -1052,25 +1101,39 @@ class FoodLogSection {
                 cancelButtonColor: "#9ca3af"   // optional: gray
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Clear loggedMeals
-                    this.loggedMeals = {
-                        totalCalories: 0,
-                        totalProtein: 0,
-                        totalCarbs: 0,
-                        totalFat: 0,
-                        meals: []
-                    };
-                    const today = this.getTodayKey();
-                    const dailyLog = this.getDailyLog();
+                    try {
+                        // Clear loggedMeals
+                        this.loggedMeals = {
+                            totalCalories: 0,
+                            totalProtein: 0,
+                            totalCarbs: 0,
+                            totalFat: 0,
+                            meals: []
+                        };
+                        const today = this.getTodayKey();
+                        const dailyLog = this.getDailyLog();
 
-                    delete dailyLog[today];
-                    localStorage.setItem('nutriplan_daily_log', JSON.stringify(dailyLog));
+                        delete dailyLog[today];
+                        localStorage.setItem('nutriplan_daily_log', JSON.stringify(dailyLog));
 
-                    this.showLoggedMeals();
-                    Swal.fire("Cleared!", "Food log has been cleared.", "success");
+                        this.showLoggedMeals();
+                        Swal.fire("Cleared!", "Food log has been cleared.", "success");
+                    }
+                    catch (error) {
+                        console.error("Failed to clear food log:", error);
+                        Swal.fire({
+                            title: "Failed!",
+                            text: "Could not clear today's food log. Please try again.",
+                            icon: "error",
+                            confirmButtonText: "OK",
+                            confirmButtonColor: "#dc2626"
+                        });
+                    }
                 }
             });
         });
+
+
         this.showLoggedMeals();
         this.hideSection();
     }
@@ -1460,6 +1523,56 @@ class FoodLogSection {
         gridBox += `</div>`;//closing tag for grid 
 
         chartContainer.innerHTML = gridBox;
+        this.showQuickStates(chartDays)
+    }
+    showQuickStates(chartDays) {
+        const quickStatsContainer = document.getElementById('weekly-log-quick-states');
+        let totalCalories = 0;
+        let totalItems = 0;
+        let daysOnGoal = 0;
+        const calorieGoal = 2000;//human needed calories per day
+        chartDays.forEach(day => {
+            if (day.data) {
+                totalCalories += day.data.totalCalories;
+                totalItems += day.data.meals.length;
+                if (day.data.totalCalories >= 1800 && day.data.totalCalories <= calorieGoal + 200) daysOnGoal++;
+            }
+        })
+        quickStatsContainer.innerHTML = `     <div class="bg-white rounded-xl p-4 border-2 border-gray-200">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
+                <i class="text-emerald-600 text-xl fa fa-chart-line"></i>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">Weekly Average</p>
+                <p class="text-xl font-bold text-gray-900">${Math.round(totalCalories / 7)} kcal</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl p-4 border-2 border-gray-200">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                <i class="text-blue-600 text-xl fa fa-utensils"></i>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">Total Items This Week</p>
+                <p class="text-xl font-bold text-gray-900">${totalItems} items</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl p-4 border-2 border-gray-200">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                <i class="text-purple-600 text-xl fa fa-bullseye"></i>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">Days On Goal</p>
+                <p class="text-xl font-bold text-gray-900">${daysOnGoal} / 7</p>
+              </div>
+            </div>
+          </div>`;
     }
 }
 
