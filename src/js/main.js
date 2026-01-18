@@ -1123,7 +1123,7 @@ class FoodLogSection {
             this.clearFoodlogBtn.classList.add('hidden');
             this.showWeeklyProgress();
             this.loggedMealCount.innerHTML = `Logged Items (0)`
-            this.logProgressBars.innerHTM = `     <!-- Calories Progress -->
+            this.logProgressBars.innerHTML = `     <!-- Calories Progress -->
             <div class="bg-emerald-50 rounded-xl p-4">
               <div class="flex items-center justify-between mb-2">
                 <span class="text-sm font-semibold text-gray-700">Calories</span>
