@@ -95,30 +95,63 @@ const NovaColors =
     4: 'bg-red-500',     // NOVA 4
     'unknown': 'bg-gray-400'
 }
-// nutri_novaStyle = {
+const nutri_novaStyle = {
 
-//     3: {
-//         'divBG': '#ee810020',
-//         'spanBG': ' #ee8100',
-//         'textColor': '#ee8100'
-//     },  // NOVA 3
-//     'd': {
-//         'divBG': '#ee810020',
-//         'spanBG': ' #ee8100',
-//         'textColor': '#ee8100'
-//     },
+    '1': {
+        'divBG': '#03814120',
+        'spanBG': ' #038141',
+        'textColor': '#038141'
+    },
+    '2': {
+        'divBG': '#85bb2f20',
+        'spanBG': '#85bb2f',
+        'textColor': '#85bb2f'
+    },
+    '3': {
+        'divBG': '#ee810020',
+        'spanBG': ' #ee8100',
+        'textColor': '#ee8100'
+    },  // NOVA 3
 
-//     4: {
-//         'divBG': '#e63e1120',
-//         'spanBG': '#e63e11',
-//         'textColor': '#e63e11'
-//     },
-//     'e': {
-//         'divBG': '#e63e1120',
-//         'spanBG': '#e63e11',
-//         'textColor': '#e63e11'
-//     }
-// }
+    '4': {
+        'divBG': '#e63e1120',
+        'spanBG': '#e63e11',
+        'textColor': '#e63e11'
+    },
+    "a": {
+        'divBG': '#03814120',
+        'spanBG': ' #038141',
+        'textColor': '#038141'
+    },
+    "b": {
+        'divBG': '#85bb2f20',
+        'spanBG': '#85bb2f',
+        'textColor': '#85bb2f'
+    },
+    "c": {
+        'divBG': '#fecb0220',
+        'spanBG': '#fecb02',
+        'textColor': '#fecb02'
+    },
+    "d": {
+        'divBG': '#ee810020',
+        'spanBG': ' #ee8100',
+        'textColor': '#ee8100'
+    },
+
+    "e": {
+        'divBG': '#e63e1120',
+        'spanBG': '#e63e11',
+        'textColor': '#e63e11'
+    },
+    'unknown': {
+        'divBG': '#fff',
+        'spanBG': ' #999',
+        'textColor': '#999'
+    }
+}
+
+
 const sections = document.querySelectorAll('section');
 
 const loadingScreen = document.getElementById('app-loading-overlay');
@@ -803,6 +836,10 @@ class MealDetails {
     }
     async fillNutritionData(nutrition) {
         let food = nutrition.perServing;
+        let foodWeight = nutrition.totalWeight / nutrition.servings;
+        console.log('foodWeight : ', foodWeight);
+        // console.log('nutrition servings: ',nutrition.servings);
+
         document.getElementById('hero-servings').textContent = `${nutrition.servings} servings`
         const nutitionInfo = {
             'Protein': 0,
@@ -879,7 +916,7 @@ class MealDetails {
                     <span class="font-bold text-gray-900">${nutitionInfo.Protein}g</span>
                   </div>
                   <div class="w-full bg-gray-100 rounded-full h-2">
-                    <div class="bg-emerald-500 h-2 rounded-full" style="width: 84%"></div>
+                    <div class="bg-emerald-500 h-2 rounded-full" style="width: ${Math.min(Math.round((Number(nutitionInfo.Protein) / foodWeight) * 100), 100)}%"></div>
                   </div>
 
                   <div class="flex items-center justify-between">
@@ -890,7 +927,7 @@ class MealDetails {
                     <span class="font-bold text-gray-900">${nutitionInfo.Carbs}g</span>
                   </div>
                   <div class="w-full bg-gray-100 rounded-full h-2">
-                    <div class="bg-blue-500 h-2 rounded-full" style="width: 17%"></div>
+                    <div class="bg-blue-500 h-2 rounded-full" style="width: ${Math.min(Math.round((Number(nutitionInfo.Carbs) / foodWeight) * 100), 100)}%"></div>
                   </div>
 
                   <div class="flex items-center justify-between">
@@ -901,7 +938,7 @@ class MealDetails {
                     <span class="font-bold text-gray-900">${nutitionInfo.Fats}g</span>
                   </div>
                   <div class="w-full bg-gray-100 rounded-full h-2">
-                    <div class="bg-purple-500 h-2 rounded-full" style="width: 12%"></div>
+                    <div class="bg-purple-500 h-2 rounded-full" style="width: ${Math.min(Math.round((Number(nutitionInfo.Fats) / foodWeight) * 100), 100)}%"></div>
                   </div>
 
                   <div class="flex items-center justify-between">
@@ -912,7 +949,7 @@ class MealDetails {
                     <span class="font-bold text-gray-900">${nutitionInfo.Fiber}g</span>
                   </div>
                   <div class="w-full bg-gray-100 rounded-full h-2">
-                    <div class="bg-orange-500 h-2 rounded-full" style="width: 14%"></div>
+                    <div class="bg-orange-500 h-2 rounded-full" style="width: ${Math.min(Math.round((Number(nutitionInfo.Fiber) / foodWeight) * 100), 100)}%"></div>
                   </div>
 
                   <div class="flex items-center justify-between">
@@ -923,7 +960,7 @@ class MealDetails {
                     <span class="font-bold text-gray-900">${nutitionInfo.Sugar}g</span>
                   </div>
                   <div class="w-full bg-gray-100 rounded-full h-2">
-                    <div class="bg-pink-500 h-2 rounded-full" style="width: 24%"></div>
+                    <div class="bg-pink-500 h-2 rounded-full" style="width: ${Math.min(Math.round((Number(nutitionInfo.Sugar) / foodWeight) * 100), 100)}%"></div>
                   </div>
 
                   <div class="flex items-center justify-between">
@@ -934,7 +971,7 @@ class MealDetails {
                     <span class="font-bold text-gray-900">${nutitionInfo.Saturated_Fat}g</span>
                 </div>
                 <div class="w-full bg-gray-100 rounded-full h-2">
-                    <div class="bg-red-500 h-2 rounded-full" style="width: 0%"></div>
+                    <div class="bg-red-500 h-2 rounded-full" style="width: ${Math.min(Math.round((Number(nutitionInfo.Saturated_Fat) / foodWeight) * 100), 100)}%"></div>
                 </div>
                 </div>
 
@@ -1369,13 +1406,14 @@ class FoodLogSection {
     showWeeklyProgress() {
         const chartContainer = document.getElementById('weekly-chart');
         const loggedDays = JSON.parse(localStorage.getItem('nutriplan_daily_log')) || {};
-        if (!loggedDays) {
-            //emptyCase
-            document.getElementById('weekly-chart').innerHTML = ` <div class="text-center text-gray-400">
-              <i class="fa-solid fa-chart-line text-4xl mb-2"></i>
-              <p>Weekly nutrition chart will appear here</p>
-            </div>`
-        }
+        // if (!loggedDays) {
+        //     //emptyCase
+        //     document.getElementById('weekly-chart').innerHTML = ` <div class="text-center text-gray-400">
+        //       <i class="fa-solid fa-chart-line text-4xl mb-2"></i>
+        //       <p>Weekly nutrition chart will appear here</p>
+        //     </div>`
+        //     //return;
+        // }
         const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
         const today = new Date();
         const chartDays = [];
@@ -1422,17 +1460,6 @@ class FoodLogSection {
         gridBox += `</div>`;//closing tag for grid 
 
         chartContainer.innerHTML = gridBox;
-
-        //normal Case
-        // نفترض أن الـ localStorage مخزن كالوري لكل يوم كده:
-        // localStorage.setItem('dailyCalories', JSON.stringify({
-        //    '2026-01-18': { totalCalories: 1517, items: 3 },
-        //    '2026-01-16': { totalCalories: 1200, items: 2 },
-        // }));
-
-
-
-
     }
 }
 
@@ -1463,7 +1490,8 @@ class ProductsSection {
             'bg-gradient-to-r from-orange-500 to-red-500'    // 9
         ];
         this.isProducts = false;
-        this.products = [];
+        this.filteredProducts = [];
+        this.allProducts = [];
 
         this.nutriScoreFilterButtons = document.querySelectorAll('.nutri-score-filter');
 
@@ -1559,10 +1587,19 @@ class ProductsSection {
         //nutri-score-filter All A B C D E
         this.nutriScoreFilterButtons.forEach(btn => {
             btn.addEventListener('click', () => {
-                if (this.isProducts) {
+                if (this.allProducts.length > 0) {
                     const grade = btn.getAttribute('data-grade');
                     console.log(grade);
                     this.filterByScore(grade);
+                    //Update Button Style
+                    this.nutriScoreFilterButtons.forEach(b => {
+                        // Reset All button
+                        b.classList.remove('ring-2', 'ring-gray-900');
+
+                    });
+
+                    // Set Classes to the active button
+                    btn.classList.add('ring-2', 'ring-gray-900');
                 }
             })
         })
@@ -1621,6 +1658,7 @@ class ProductsSection {
             console.log(error);
         }
     }
+
     async SearchProduct(term = '') {
         try {
             let value = (this.productSearchInput.value || term).toLowerCase();
@@ -1635,7 +1673,8 @@ class ProductsSection {
             console.log(result.pagination.total);
 
             const products = result.results;
-            this.products = products
+            this.allProducts = products;  // original copy
+            this.filteredProducts = products;     //   copy to show/display
             console.log(products);
 
             this.fillProductsGrid(products);
@@ -1644,6 +1683,7 @@ class ProductsSection {
             console.log(error);
         }
     }
+
     async SearchBarcodeProduct() {
         try {
             const barcode = (this.barcodeInput.value);
@@ -1659,9 +1699,9 @@ class ProductsSection {
             products.push(result.result);
             console.log(products);
             this.productsCount.textContent = `Found product: ${products[0].name}`;
-            this.products = products
+            this.allProducts = products;  // original copy
+            this.filteredProducts = products;     //   copy to show/display
             this.fillProductsGrid(products);
-            console.log('oooo');
 
         }
         catch (error) {
@@ -1679,6 +1719,8 @@ class ProductsSection {
             this.productsEmpty.classList.add('hidden');
             this.productsGrid.classList.remove('hidden');
             this.productsLoading.classList.add('hidden')
+            this.allProducts = filteredProducts;  // original copy
+            this.filteredProducts = filteredProducts;     //   copy to show/display
             this.fillProductsGrid(filteredProducts);
 
             console.log('show by category');
@@ -1688,12 +1730,24 @@ class ProductsSection {
             console.log(error);
         }
     }
-    fillProductsGrid(products) {
-        this.isProducts = true;
 
-        let box = ``;
-        for (var i = 0; i < products.length; i++) {
-            box += `  <div
+    fillProductsGrid(products) {
+        this.isProducts = products.length > 0;
+        console.log('All Products:', this.allProducts);
+        console.log('filtered Products:', this.filteredProducts);
+        console.log('flag', this.isProducts);
+
+        if (products.length > 0) {
+            this.productsEmpty.classList.add('hidden');
+            this.productsGrid.classList.remove('hidden');
+            this.productsLoading.classList.add('hidden');
+
+            let box = ``;
+            for (var i = 0; i < products.length; i++) {
+                const nutriGrade = products[i].nutritionGrade || 'unknown';
+                const novaGroup = products[i].novaGroup || 'unknown';
+
+                box += `  <div
               class="product-card bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all cursor-pointer group"
               data-barcode="${products[i].barcode}">
               <div class="relative h-40 bg-gray-100 flex items-center justify-center overflow-hidden">
@@ -1703,15 +1757,15 @@ class ProductsSection {
 
                 <!-- Nutri-Score Badge -->
                 <div
-                  class="absolute top-2 left-2 ${NutriScore[products[i].nutritionGrade]} text-white text-xs font-bold px-2 py-1 rounded uppercase">
-                  Nutri-Score ${products[i].nutritionGrade}
+                  class="absolute top-2 left-2 ${NutriScore[nutriGrade]} text-white text-xs font-bold px-2 py-1 rounded uppercase">
+                  Nutri-Score ${nutriGrade}
                 </div>
 
                 <!-- NOVA Badge -->
-                    ${products[i].novaGroup ? ` <div
-                  class="absolute top-2 right-2 ${NovaColors[products[i].novaGroup]} text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center"
-                  title="NOVA ${products[i].novaGroup}">
-                  ${products[i].novaGroup}
+                    ${novaGroup != 'unknown' ? ` <div
+                  class="absolute top-2 right-2 ${NovaColors[novaGroup]} text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center"
+                  title="NOVA ${novaGroup}">
+                  ${novaGroup}
                 </div>`: `<div
                   class="absolute top-2 right-2 bg-gray-400 text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center hidden"
                   title="NOVA "}>
@@ -1755,23 +1809,34 @@ class ProductsSection {
                 </div>
               </div>
             </div>`
-        }
-        this.productsGrid.innerHTML = box;
-        this.productsCards = document.querySelectorAll('.product-card');
-        this.productsCards.forEach(card => {
-            card.addEventListener('click', () => {
-                this.productdetailModal.classList.remove('loading');
-                const barcodeP = card.getAttribute('data-barcode');
-                this.fillProductModal(barcodeP);
+            }
+            this.productsGrid.innerHTML = box;
+            this.productsCards = document.querySelectorAll('.product-card');
+            this.productsCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    this.productdetailModal.classList.remove('loading');
+                    const barcodeP = card.getAttribute('data-barcode');
+                    this.fillProductModal(barcodeP);
+                });
             });
-        });
+        }
+        else {
+
+            //when no products
+            this.productsEmpty.classList.remove('hidden');
+            this.productsGrid.classList.add('hidden');
+            this.productsLoading.classList.add('hidden');
+
+        }
     }
     filterByScore(grade) {
+        // if (!this.isProducts) return;//lw mfesh montgat asln
         if (!grade) { //if all
-            this.fillProductsGrid(this.products); // displayALL
+            this.fillProductsGrid(this.allProducts); // displayALL
             return;
         }
-        const filtered = this.products.filter(product => product.nutritionGrade === grade);
+        const filtered = this.allProducts.filter(product => product.nutritionGrade === grade);
+        this.filteredProducts = filtered;
         this.fillProductsGrid(filtered);
     }
 
@@ -1782,8 +1847,6 @@ class ProductsSection {
             let response = await fetch(`https://nutriplan-api.vercel.app/api/products/barcode/${barcode}`);
             const result = await response.json();
             const product = result.result;
-            console.log(product);
-
             this.loggedProduct.id_barcode = product.barcode;
             this.loggedProduct.category = product.brand;
             this.loggedProduct.name = product.name;
@@ -1795,6 +1858,8 @@ class ProductsSection {
             this.loggedProduct.nutrition.fat = product.nutrients.fat;
             this.loggedProduct.nutrition.protein = product.nutrients.protein;
 
+            const nutriScoreStyle = nutri_novaStyle[product.nutritionGrade] || nutri_novaStyle['unknown'];
+            const novaStyle = nutri_novaStyle[product.novaGroup] || nutri_novaStyle['unknown'];
 
             this.productdetailModal.innerHTML = `
   <div class="bg-white rounded-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
@@ -1812,30 +1877,30 @@ class ProductsSection {
             <p class="text-sm text-emerald-600 font-semibold mb-1">${product.brand}</p>
             <h2 class="text-2xl font-bold text-gray-900 mb-2">${product.name}</h2>
             
-            <p class="text-sm text-gray-500 mb-3">1 kg</p>
+            <p class="text-sm text-gray-500 mb-3">100 g</p>
 
             <div class="flex items-center gap-3">
 
-              <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg" style="background-color: #e63e1120">
+              <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg" style="background-color: ${nutriScoreStyle.divBG}">
                 <span class="w-8 h-8 rounded flex items-center justify-center text-white font-bold"
-                  style="background-color: #e63e11">
+                  style="background-color: ${nutriScoreStyle.spanBG}">
                   ${product.nutritionGrade}
                 </span>
                 <div>
-                  <p class="text-xs font-bold" style="color: #e63e11">Nutri-Score</p>
+                  <p class="text-xs font-bold" style="color: ${nutriScoreStyle.textColor}">Nutri-Score</p>
                   <p class="text-[10px] text-gray-600">${NutriScoreWords[product.nutritionGrade]}</p>
                 </div>
               </div>
 
 
 
-              <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg" style="background-color: #e63e1120">
+              <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg" style="background-color: ${novaStyle.divBG}">
                 <span class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold"
-                  style="background-color: #e63e11">
+                  style="background-color: ${novaStyle.spanBG}">
                   ${product.novaGroup}
                 </span>
                 <div>
-                  <p class="text-xs font-bold" style="color: #e63e11">NOVA</p>
+                  <p class="text-xs font-bold" style="color: ${novaStyle.textColor}">NOVA</p>
                   <p class="text-[10px] text-gray-600">${NovaWords[product.novaGroup]}</p>
                 </div>
               </div>
@@ -1862,28 +1927,28 @@ class ProductsSection {
           <div class="grid grid-cols-4 gap-4">
             <div class="text-center">
               <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
-                <div class="bg-emerald-500 h-2 rounded-full" style="width: 12.6%"></div>
+                <div class="bg-emerald-500 h-2 rounded-full" style="width: ${Math.min(Math.round((Number(product.nutrients.protein) / 100) * 100), 100)}%"></div>
               </div>
               <p class="text-lg font-bold text-emerald-600">${product.nutrients.protein}</p>
               <p class="text-xs text-gray-500">Protein</p>
             </div>
             <div class="text-center">
               <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
-                <div class="bg-blue-500 h-2 rounded-full" style="width: 57.49999999999999%"></div>
+                <div class="bg-blue-500 h-2 rounded-full" style="width: ${Math.min(Math.round((Number(product.nutrients.carbs) / 100) * 100), 100)}%"></div>
               </div>
               <p class="text-lg font-bold text-blue-600">${product.nutrients.carbs}g</p>
               <p class="text-xs text-gray-500">Carbs</p>
             </div>
             <div class="text-center">
               <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
-                <div class="bg-purple-500 h-2 rounded-full" style="width: 47.53846153846153%"></div>
+                <div class="bg-purple-500 h-2 rounded-full" style="width: ${Math.min(Math.round((Number(product.nutrients.fat) / 100) * 100), 100)}%"></div>
               </div>
               <p class="text-lg font-bold text-purple-600">${product.nutrients.fat}g</p>
               <p class="text-xs text-gray-500">Fat</p>
             </div>
             <div class="text-center">
               <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
-                <div class="bg-orange-500 h-2 rounded-full" style="width: 100%"></div>
+                <div class="bg-orange-500 h-2 rounded-full" style="width: ${Math.min(Math.round((Number(product.nutrients.sugar) / 100) * 100), 100)}%"></div>
               </div>
               <p class="text-lg font-bold text-orange-600">${product.nutrients.sugar}g</p>
               <p class="text-xs text-gray-500">Sugar</p>
